@@ -96,30 +96,68 @@ VisualsEnemies_BoxEsp:Colorpicker({
     Pointer = "VisualsEnemies_BoxVisibleColor"
 })
 
--- Opciones Adicionales para Visuals (Team Check y más)
-Visuals_Enemies:Toggle({
+-- Opciones Adicionales para Visuals (Team Check, Box, Health Bar, y Name Tag)
+local Visuals_TeamCheck = Visuals_Enemies:Toggle({
     Name = "Team Check",
     Default = false,
     Pointer = "VisualsEnemies_TeamCheck"
 })
 
-Visuals_Enemies:Toggle({
+local Visuals_Box = Visuals_Enemies:Toggle({
     Name = "Box",
     Default = false,
     Pointer = "VisualsEnemies_Box"
 })
 
-Visuals_Enemies:Toggle({
+local Visuals_HealthBar = Visuals_Enemies:Toggle({
     Name = "Health Bar",
     Default = true,
     Pointer = "VisualsEnemies_HealthBar"
 })
 
-Visuals_Enemies:Toggle({
+local Visuals_NameTag = Visuals_Enemies:Toggle({
     Name = "Name Tag",
     Default = true,
     Pointer = "VisualsEnemies_NameTag"
 })
+
+-- Función para actualizar los Visuals
+game:GetService("RunService").RenderStepped:Connect(function()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                
+                -- Verificar si debe dibujarse la caja alrededor del jugador (Box ESP)
+                if Library.flags.VisualsEnemies_BoxEsp then
+                    -- Dibuja una caja alrededor del personaje enemigo
+                    -- Aquí puedes usar tus propias funciones para dibujar la caja en pantalla
+                end
+
+                -- Team Check (verifica si el jugador es del equipo contrario)
+                if Library.flags.VisualsEnemies_TeamCheck and player.Team == game.Players.LocalPlayer.Team then
+                    continue -- Ignora si es del mismo equipo
+                end
+
+                -- Dibujar Box
+                if Library.flags.VisualsEnemies_Box then
+                    -- Aquí iría el código para dibujar una caja en el enemigo
+                end
+
+                -- Dibujar Health Bar
+                if Library.flags.VisualsEnemies_HealthBar then
+                    -- Aquí va el código para dibujar la barra de vida en el enemigo
+                end
+
+                -- Dibujar Name Tag
+                if Library.flags.VisualsEnemies_NameTag then
+                    -- Aquí va el código para mostrar el nombre del enemigo
+                end
+            end
+        end
+    end
+end)
 
 -- Configuración de Visuals para el Jugador
 Visuals_Self:Toggle({
