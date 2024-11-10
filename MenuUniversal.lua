@@ -1,5 +1,13 @@
--- Carga la Jan Library
-loadstring(game:HttpGet('https://garfieldscripts.xyz/ui-libs/janlib.lua'))()
+-- Intenta cargar la Jan Library de forma segura
+local success, JanLib = pcall(function()
+    return loadstring(game:HttpGet('https://garfieldscripts.xyz/ui-libs/janlib.lua'))()
+end)
+
+-- Verificar si la carga fue exitosa
+if not success or not JanLib then
+    warn("No se pudo cargar la Jan Library. Por favor, verifica la URL o la conexión a internet.")
+    return
+end
 
 -- Inicializar la biblioteca
 local library = JanLib:Create({
