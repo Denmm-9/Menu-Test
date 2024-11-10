@@ -45,32 +45,6 @@ local function findTarget(radius, hitPart)
     return target
 end
 
--- Función para dibujar ESP en el enemigo
-local function createESP(player)
-    local esp = Instance.new("BillboardGui")
-    esp.Adornee = player.Character:FindFirstChild("HumanoidRootPart")
-    esp.Size = UDim2.new(ESPSize, 0, ESPSize, 0)
-    esp.AlwaysOnTop = true
-    esp.Name = "ESP"
-    
-    local frame = Instance.new("Frame", esp)
-    frame.Size = UDim2.new(1, 0, 1, 0)
-    frame.BackgroundTransparency = 0.5
-    frame.BackgroundColor3 = ESPColor  -- Usar el color actual de ESP
-    
-    esp.Parent = player.Character:FindFirstChild("HumanoidRootPart")
-end
-
--- Función para eliminar ESP cuando el jugador se desconecta o cambia de equipo
-local function removeESP(player)
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local esp = player.Character.HumanoidRootPart:FindFirstChild("ESP")
-        if esp then
-            esp:Destroy()
-        end
-    end
-end
-
 -- Crear ventana principal de configuración de Aimbot en la UI
 local Window1 = library.NewWindow({
     title = "Aimbot & Visuals Settings | My Game",
@@ -179,16 +153,6 @@ VisualsSection:AddToggle({
                 removeESP(player)
             end
         end
-    end
-})
-
--- Simplificar el manejo de ColorPicker y asegurar que el color se actualice bien
-VisualsSection:AddColorPicker({
-    text = "ESP Color",
-    color = ESPColor,
-    flag = "ESPColor",
-    callback = function(color)
-        ESPColor = color  -- Actualiza el color global de ESP
     end
 })
 
