@@ -1,8 +1,16 @@
 -- Cargar la biblioteca Tokyo Lib para la interfaz de usuario
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/drillygzzly/Roblox-UI-Libs/main/1%20Tokyo%20Lib%20(FIXED)/Tokyo%20Lib%20Source.lua"))({
-    cheatname = "Aimbot Config",
-    gamename = "My Game"
-})
+local success, library = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/drillygzzly/Roblox-UI-Libs/main/1%20Tokyo%20Lib%20(FIXED)/Tokyo%20Lib%20Source.lua"))({
+        cheatname = "Aimbot Config",
+        gamename = "My Game"
+    })
+end)
+
+-- Verificar si la biblioteca se cargó correctamente
+if not success or not library then
+    warn("Error al cargar la biblioteca Tokyo Lib")
+    return
+end
 
 library:init()
 
@@ -47,8 +55,8 @@ end
 
 -- Crear ventana principal de configuración de Aimbot en la UI
 local Window1 = library.NewWindow({
-    title = "Aimbot & Visuals Settings | My Game",
-    size = UDim2.new(0, 510, 0.6, 6)
+    title = "Aimbot & Visuals Settings",
+    size = UDim2.new(0, 510, 0, 400)  -- Ajustar el tamaño para evitar errores de visualización
 })
 
 local Tab1 = Window1:AddTab("Aimbot")
@@ -79,7 +87,7 @@ AimbotSection:AddSlider({
     text = "FOV Radius",
     min = 0,
     max = 1000,
-    increment = 1,
+    increment = 10,
     flag = "FOVRadius",
     callback = function(value)
         FOVRadius = value
@@ -100,32 +108,10 @@ AimbotSection:AddSlider({
     text = "Smoothness",
     min = 0,
     max = 1,
-    increment = 0.01,
+    increment = 0.05,
     flag = "Smoothness",
     callback = function(value)
         Smoothness = value
-    end
-})
-
-AimbotSection:AddSlider({
-    text = "Prediction X",
-    min = -1,
-    max = 1,
-    increment = 0.01,
-    flag = "PredictionX",
-    callback = function(value)
-        PredictionX = value
-    end
-})
-
-AimbotSection:AddSlider({
-    text = "Prediction Y",
-    min = -1,
-    max = 1,
-    increment = 0.01,
-    flag = "PredictionY",
-    callback = function(value)
-        PredictionY = value
     end
 })
 
@@ -140,19 +126,6 @@ VisualsSection:AddToggle({
     flag = "ESPEnabled",
     callback = function(enabled)
         ESPEnabled = enabled
-        if ESPEnabled then
-            -- Agregar ESP a los enemigos
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= game.Players.LocalPlayer and player.Team ~= game.Players.LocalPlayer.Team then
-                    createESP(player)
-                end
-            end
-        else
-            -- Remover ESP cuando se desactiva
-            for _, player in pairs(game.Players:GetPlayers()) do
-                removeESP(player)
-            end
-        end
     end
 })
 
@@ -168,7 +141,4 @@ VisualsSection:AddSlider({
 })
 
 -- Notificación de carga
-local Decimals = 4
-local Clock = os.clock()
-local Time = (string.format("%." .. tostring(Decimals) .. "f", os.clock() - Clock))
-library:SendNotification(("Loaded In " .. tostring(Time)), 6)
+library:SendNotification("Loaded Successfully", 6)
