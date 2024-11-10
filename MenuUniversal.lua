@@ -1,144 +1,83 @@
--- Cargar la biblioteca Tokyo Lib para la interfaz de usuario
-local success, library = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/drillygzzly/Roblox-UI-Libs/main/1%20Tokyo%20Lib%20(FIXED)/Tokyo%20Lib%20Source.lua"))({
-        cheatname = "Aimbot Config",
-        gamename = "My Game"
-    })
-end)
+-- Carga la Jan Library
+loadstring(game:HttpGet('https://garfieldscripts.xyz/ui-libs/janlib.lua'))()
 
--- Verificar si la biblioteca se cargó correctamente
-if not success or not library then
-    warn("Error al cargar la biblioteca Tokyo Lib")
-    return
-end
-
-library:init()
-
--- Variables de Aimbot
-local FOVRadius = 100
-local HitPart = "Head"
-local AimbotEnabled = false
-local Smoothness = 0.5
-local PredictionX = 0.2
-local PredictionY = 0.2
-
--- Variables de Visuals (ESP)
-local ESPEnabled = false
-local ESPColor = Color3.fromRGB(255, 0, 0)  -- Color inicial por defecto en rojo
-local ESPSize = 3
-
--- Función para activar el Aimbot apuntando al objetivo
-local function enableAimbot(target)
-    local camera = workspace.CurrentCamera
-    local predictedPosition = target.Position + target.Velocity * Vector3.new(PredictionX, PredictionY, 0)
-    camera.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position:Lerp(predictedPosition, Smoothness))
-end
-
--- Función para encontrar el objetivo dentro del radio de FOV
-local function findTarget(radius, hitPart)
-    local target
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer and player.Team ~= game.Players.LocalPlayer.Team then
-            local character = player.Character
-            if character and character:FindFirstChild(hitPart) then
-                local part = character[hitPart]
-                local distance = (part.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
-                if distance <= radius then
-                    target = part
-                    break
-                end
-            end
-        end
-    end
-    return target
-end
-
--- Crear ventana principal de configuración de Aimbot en la UI
-local Window1 = library.NewWindow({
-    title = "Aimbot & Visuals Settings",
-    size = UDim2.new(0, 510, 0, 400)  -- Ajustar el tamaño para evitar errores de visualización
+-- Inicializar la biblioteca
+local library = JanLib:Create({
+    Name = "My Custom Script",
+    SizeX = 600,
+    SizeY = 400,
+    Theme = "Dark"
 })
 
-local Tab1 = Window1:AddTab("Aimbot")
-local AimbotSection = Tab1:AddSection("Aimbot Configuration", 1)
+-- [Legit Tab]
+local LegitTab = library:AddTab("Legit")
 
--- Opciones de Aimbot en la interfaz
-AimbotSection:AddToggle({
-    text = "Enable Aimbot",
-    state = false,
-    flag = "AimbotEnabled",
-    callback = function(enabled)
-        AimbotEnabled = enabled
-        if AimbotEnabled then
-            -- Ejecuta la lógica del aimbot mientras esté habilitado
-            game:GetService("RunService").RenderStepped:Connect(function()
-                if AimbotEnabled then
-                    local target = findTarget(FOVRadius, HitPart)
-                    if target then
-                        enableAimbot(target)
-                    end
-                end
-            end)
-        end
-    end
-})
+-- Aim Assist Section
+local LegitMain = LegitTab:AddSection("Aim Assist")
+LegitMain:AddToggle("AimbotEnabled", {Text = "Enabled"})
+LegitMain:AddSlider("AimbotFov", {Text = "Aimbot FOV", Min = 0, Max = 750, Default = 105})
+LegitMain:AddSlider("Smoothing", {Text = "Smoothing Factor", Min = 0, Max = 30, Default = 3})
+LegitMain:AddDropdown("AimbotHitbox", {Text = "Hit Box", Options = {"Head", "Torso"}})
+LegitMain:AddDropdown("AimbotKey", {Text = "Aimbot Key", Options = {"On Aim", "On Shoot"}})
+LegitMain:AddToggle("CircleEnabled", {Text = "Draw Fov", Default = false})
+LegitMain:AddColorPicker("CircleColor", {Text = "Fov Color", Default = Color3.new(1, 1, 1)})
+LegitMain:AddSlider("CircleNumSides", {Text = "Num Sides", Min = 3, Max = 48, Default = 48})
 
-AimbotSection:AddSlider({
-    text = "FOV Radius",
-    min = 0,
-    max = 1000,
-    increment = 10,
-    flag = "FOVRadius",
-    callback = function(value)
-        FOVRadius = value
-    end
-})
+-- Extend Hitbox Section
+local LegitSecond = LegitTab:AddSection("Extend Hitbox")
+LegitSecond:AddToggle("HitboxEnabled", {Text = "Enabled"})
+LegitSecond:AddDropdown("ExtendHitbox", {Text = "Hit Box", Options = {"Head", "Torso"}})
+LegitSecond:AddSlider("ExtendRate", {Text = "Extend Rate", Min = 0, Max = 10, Default = 10})
 
-AimbotSection:AddList({
-    text = "Hit Part",
-    values = {"Head", "Body", "Legs"},
-    selected = "Head",
-    flag = "HitPart",
-    callback = function(value)
-        HitPart = value
-    end
-})
+-- Trigger Bot Section
+local LegitThird = LegitTab:AddSection("Trigger Bot")
+LegitThird:AddToggle("TriggerEnabled", {Text = "Enabled"})
+LegitThird:AddKeybind("TriggerBind", {Text = "Trigger Key", Default = Enum.KeyCode.One})
+LegitThird:AddSlider("TriggerSpeed", {Text = "Trigger Speed", Min = 0, Max = 1000, Default = 10})
 
-AimbotSection:AddSlider({
-    text = "Smoothness",
-    min = 0,
-    max = 1,
-    increment = 0.05,
-    flag = "Smoothness",
-    callback = function(value)
-        Smoothness = value
-    end
-})
+-- Bullet Redirection Section
+local LegitForth = LegitTab:AddSection("Bullet Redirection")
+LegitForth:AddToggle("SilentAimEnabled", {Text = "Enabled"})
+LegitForth:AddSlider("SilentAimFOV", {Text = "Silent Aim FOV", Min = 0, Max = 750, Default = 105})
+LegitForth:AddSlider("HitChances", {Text = "Hit Chances", Min = 0, Max = 100, Default = 100})
+LegitForth:AddDropdown("RedirectionMode", {Text = "Redirection Mode", Options = {"P Mode", "Normal Mode"}})
+LegitForth:AddDropdown("SilentAimHitbox", {Text = "Hit Box", Options = {"Head", "Torso"}})
+LegitForth:AddToggle("Circle2Enabled", {Text = "Draw Fov"})
+LegitForth:AddColorPicker("Circle2Color", {Text = "Fov Color", Default = Color3.new(1, 1, 1)})
+LegitForth:AddSlider("Circle2NumSides", {Text = "Num Sides", Min = 3, Max = 48, Default = 48})
+LegitForth:AddToggle("VisibleCheck", {Text = "Visible Check"})
 
--- Tab para Visuals
-local VisualsTab = Window1:AddTab("Visuals")
-local VisualsSection = VisualsTab:AddSection("Visuals Configuration", 1)
+-- Recoil Control Section
+local LegitFifth = LegitTab:AddSection("Recoil Control")
+LegitFifth:AddToggle("RecoilControlEnabled", {Text = "Enabled"})
+LegitFifth:AddSlider("ModelKick", {Text = "Model Kick", Min = 5, Max = 100, Default = 100})
+LegitFifth:AddSlider("CameraKick", {Text = "Camera Kick", Min = 5, Max = 100, Default = 100})
 
--- Opciones de Visuals (ESP)
-VisualsSection:AddToggle({
-    text = "Enable ESP",
-    state = false,
-    flag = "ESPEnabled",
-    callback = function(enabled)
-        ESPEnabled = enabled
-    end
-})
+-- [Visuals Tab]
+local VisualsTab = library:AddTab("Visuals")
 
-VisualsSection:AddSlider({
-    text = "ESP Size",
-    min = 1,
-    max = 5,
-    increment = 1,
-    flag = "ESPSize",
-    callback = function(value)
-        ESPSize = value
-    end
-})
+-- Local Visuals Section
+local VisualsMain = VisualsTab:AddSection("Local Visuals")
+VisualsMain:AddToggle("LocalVisualsEnabled", {Text = "Enabled"})
+VisualsMain:AddColorPicker("ArmColor", {Text = "Custom Arm Color", Default = Color3.new(0.6, 0.45, 0.97)})
+VisualsMain:AddSlider("ArmTransparency", {Text = "Transparency", Min = 0.10, Max = 0.95, Default = 0.85})
+VisualsMain:AddDropdown("ArmMaterial", {Text = "Material", Options = {"ForceField", "Neon", "SmoothPlastic"}})
 
--- Notificación de carga
-library:SendNotification("Loaded Successfully", 6)
+-- Camera Visuals Section
+local VisualsSecond = VisualsTab:AddSection("Camera Visuals")
+VisualsSecond:AddToggle("CameraVisualsEnabled", {Text = "Enabled"})
+VisualsSecond:AddSlider("CameraFOV", {Text = "Camera FOV", Min = 10, Max = 120, Default = 120})
+VisualsSecond:AddToggle("NoCameraBob", {Text = "No Camera Bob"})
+VisualsSecond:AddToggle("NoGunBob", {Text = "No Gun Bob"})
+
+-- [Settings Tab]
+local SettingsTab = library:AddTab("Settings")
+local SettingsSection = SettingsTab:AddSection("Menu")
+SettingsSection:AddKeybind("UIToggle", {Text = "Toggle UI", Default = Enum.KeyCode.End, Callback = function()
+    library:ToggleUI()
+end})
+
+SettingsSection:AddColorPicker("MenuColor", {Text = "Accent Color", Default = Color3.new(0.6, 0.45, 0.97)})
+
+-- Initialize Library
+library:Initialize()
