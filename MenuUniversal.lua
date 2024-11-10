@@ -16,7 +16,7 @@ local PredictionY = 0.2
 
 -- Variables de Visuals (ESP)
 local ESPEnabled = false
-local ESPColor = Color3.fromRGB(255, 0, 0)
+local ESPColor = Color3.fromRGB(255, 0, 0)  -- Color inicial por defecto en rojo
 local ESPSize = 3
 
 -- Función para activar el Aimbot apuntando al objetivo
@@ -56,7 +56,7 @@ local function createESP(player)
     local frame = Instance.new("Frame", esp)
     frame.Size = UDim2.new(1, 0, 1, 0)
     frame.BackgroundTransparency = 0.5
-    frame.BackgroundColor3 = ESPColor
+    frame.BackgroundColor3 = ESPColor  -- Usar el color actual de ESP
     
     esp.Parent = player.Character:FindFirstChild("HumanoidRootPart")
 end
@@ -182,12 +182,13 @@ VisualsSection:AddToggle({
     end
 })
 
+-- Simplificar el manejo de ColorPicker y asegurar que el color se actualice bien
 VisualsSection:AddColorPicker({
     text = "ESP Color",
     color = ESPColor,
     flag = "ESPColor",
     callback = function(color)
-        ESPColor = color
+        ESPColor = color  -- Actualiza el color global de ESP
     end
 })
 
