@@ -1,18 +1,20 @@
--- // Biblioteca Poop UI
+-- // Cargar la Biblioteca Splix
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/matas3535/PoopLibrary/main/Library.lua"))()
 
 if not Library then
     error("No se pudo cargar la biblioteca PoopLibrary")
 end
 
--- // Ventana Principal
+-- // Variables de interfaz
 local Window = Library:New({Name = "Menu Universal", Accent = Color3.fromRGB(25, 240, 100)})
-local menuVisible = true
+local menuVisible = true  -- Control de visibilidad del menú
+Window:SetVisible(menuVisible) -- Asegurar que el menú esté visible al inicio
 
--- // Toggle único del menú
+-- // Función única para mostrar/ocultar el menú
 local function toggleMenu()
     menuVisible = not menuVisible
     Window:SetVisible(menuVisible)
+    print("Menú visible:", menuVisible) -- Confirmación en la consola
 end
 
 -- // Página del Aimbot
@@ -178,7 +180,7 @@ Settings_Main:Keybind({
     Name = "Toggle Menu",
     Default = Enum.KeyCode.Delete,
     KeybindName = "Menu Toggle",
-    Callback = toggleMenu
+    Callback = toggleMenu  -- Llamar la función de toggleMenu
 })
 
 Settings_Main:Button({
