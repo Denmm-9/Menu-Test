@@ -21,9 +21,14 @@ AimbotTab:AddToggle({
     Pointer = "AimbotMain_Enabled",
     Callback = function(value)
         aimbotEnabled = value
-        print("Aimbot habilitado:", aimbotEnabled)
+        if aimbotEnabled then
+            print("Aimbot activated")
+        else
+            print("Aimbot deactivated")
+        end
     end
 })
+
 
 AimbotTab:AddKeybind({
     Default = aimbotKey,
