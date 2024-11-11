@@ -7,10 +7,11 @@ end
 -- Ventana Principal
 local Window = Library:New({Name = "Splix Private Poop UI", Accent = Color3.fromRGB(25, 240, 100)})
 
--- Página del Aimbot
+-- Página del Aimbot (sin elementos)
 local AimbotTab = Window:Page({Name = "Aimbot"})
-local aimbotEnabled = true  -- Habilitado por defecto
-local aimbotSmoothness = 5  -- Valor predeterminado de suavidad
+-- Configuraciones predeterminadas para el Aimbot
+local aimbotEnabled = true  -- Aimbot habilitado por defecto
+local aimbotSmoothness = 5  -- Suavidad predeterminada
 local hitPart = "Head"      -- Parte objetivo predeterminada
 
 -- Función de Aimbot
@@ -55,12 +56,13 @@ function AimAtTarget()
     end
 end
 
--- Página de Visuals
+-- Página de Visuals (sin elementos)
 local VisualsTab = Window:Page({Name = "Visuals"})
-local visualsEnabled = true  -- Habilitado por defecto
-local teamCheck = true       -- Habilitar verificación de equipo por defecto
+-- Configuraciones predeterminadas para Visuals
+local visualsEnabled = true  -- Visuals habilitados por defecto
+local teamCheck = true       -- Verificación de equipo habilitada
 
--- Función para Dibujar Cajas al Rededor de los Enemigos
+-- Función para Dibujar ESP
 function DrawESP()
     local players = game:GetService("Players")
     local localPlayer = players.LocalPlayer
@@ -104,6 +106,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 end)
 
--- Inicializar la Interfaz
+-- Inicializar la Interfaz sin controles
 Window:Initialize()
 print("Script de Aimbot y Visuals cargado correctamente")
