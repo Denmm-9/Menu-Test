@@ -4,17 +4,8 @@ if not Library then
     error("No se pudo cargar la biblioteca PoopLibrary")
 end
 
--- // Ventana Principal y Variables
+-- // Ventana Principal
 local Window = Library:New({Name = "Splix Private Poop UI", Accent = Color3.fromRGB(25, 240, 100)})
-local menuVisible = true
-Window:SetVisible(menuVisible)  -- Inicializar el menú como visible
-
--- // Función única para mostrar/ocultar el menú
-local function toggleMenu()
-    menuVisible = not menuVisible
-    Window:SetVisible(menuVisible)
-    print("Menú visible:", menuVisible) -- Confirmación en consola
-end
 
 -- // Página del Aimbot
 local AimbotTab = Window:Page({Name = "Aimbot"})
@@ -174,13 +165,6 @@ game:GetService("RunService").RenderStepped:Connect(DrawESP)
 -- // Página de Settings
 local SettingsTab = Window:Page({Name = "Settings"})
 local Settings_Main = SettingsTab:Section({Name = "Main", Side = "Left"})
-
-Settings_Main:Keybind({
-    Name = "Toggle Menu",
-    Default = Enum.KeyCode.Delete,
-    KeybindName = "Menu Toggle",
-    Callback = toggleMenu  -- Llamar la función de toggleMenu
-})
 
 Settings_Main:Button({
     Name = "Unload",
