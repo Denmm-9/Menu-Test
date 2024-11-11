@@ -9,33 +9,9 @@ local Window = Library:New({Name = "Splix Private Poop UI", Accent = Color3.from
 
 -- Página del Aimbot
 local AimbotTab = Window:Page({Name = "Aimbot"})
-local aimbotEnabled = false
-local aimbotSmoothness = 1
-local hitPart = "Head"
-
--- Configuración de Suavidad del Aimbot
-AimbotTab:AddSlider({
-    Name = "Smoothness",
-    Minimum = 1,
-    Maximum = 30,
-    Default = aimbotSmoothness,
-    Decimals = 0.1,
-    Pointer = "AimbotMain_Smoothness",
-    Callback = function(value)
-        aimbotSmoothness = value
-    end
-})
-
--- Selección de la Parte a Apuntar
-AimbotTab:AddDropdown({
-    Name = "Hit-Part",
-    Options = {"Head", "Torso", "Arms", "Legs"},
-    Default = "Head",
-    Pointer = "AimbotMain_Hitpart",
-    Callback = function(value)
-        hitPart = value
-    end
-})
+local aimbotEnabled = true  -- Habilitado por defecto
+local aimbotSmoothness = 5  -- Valor predeterminado de suavidad
+local hitPart = "Head"      -- Parte objetivo predeterminada
 
 -- Función de Aimbot
 function AimAtTarget()
@@ -81,8 +57,8 @@ end
 
 -- Página de Visuals
 local VisualsTab = Window:Page({Name = "Visuals"})
-local visualsEnabled = false
-local teamCheck = true
+local visualsEnabled = true  -- Habilitado por defecto
+local teamCheck = true       -- Habilitar verificación de equipo por defecto
 
 -- Función para Dibujar Cajas al Rededor de los Enemigos
 function DrawESP()
@@ -118,7 +94,7 @@ function DrawESP()
     end
 end
 
--- Conexión para Actualizar el ESP en Cada Frame
+-- Conexión para Actualizar el Aimbot y ESP en Cada Frame
 game:GetService("RunService").RenderStepped:Connect(function()
     if aimbotEnabled then
         AimAtTarget()
