@@ -10,24 +10,10 @@ local Window = Library:New({Name = "Splix Private Poop UI", Accent = Color3.from
 -- Página del Aimbot
 local AimbotTab = Window:Page({Name = "Aimbot"})
 local aimbotEnabled = false
-local aimbotKey = Enum.KeyCode.E
 local aimbotSmoothness = 1
 local hitPart = "Head"
 
--- Configuración de Keybind para Aimbot
-AimbotTab:AddKeybind({
-    Default = aimbotKey,
-    KeybindName = "Aimbot Key",
-    Mode = "Hold",
-    Pointer = "AimbotMain_Bind",
-    Callback = function()
-        if aimbotEnabled then
-            AimAtTarget()
-        end
-    end
-})
-
--- Configuración de Slider para la suavidad del Aimbot
+-- Configuración de Suavidad del Aimbot
 AimbotTab:AddSlider({
     Name = "Smoothness",
     Minimum = 1,
@@ -40,7 +26,7 @@ AimbotTab:AddSlider({
     end
 })
 
--- Configuración de Dropdown para la parte a apuntar
+-- Selección de la Parte a Apuntar
 AimbotTab:AddDropdown({
     Name = "Hit-Part",
     Options = {"Head", "Torso", "Arms", "Legs"},
@@ -87,11 +73,60 @@ function AimAtTarget()
             local direction = (aimPos - camera.CFrame.Position).unit
             local newCFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + direction)
 
-            -- Suavidad del aimbot
+            -- Aplicar la suavidad del aimbot
             camera.CFrame = camera.CFrame:Lerp(newCFrame, aimbotSmoothness / 30)
         end
     end
 end
+
+-- Página de Visuals
+local VisualsTab = Window:Page({Name = "Visuals"})
+local visualsEnabled = false
+local teamCheck = true
+
+-- Función para Dibujar Cajas al Rededor de los Enemigos
+function DrawESP()
+    local players = game:GetService("Players")
+    local localPlayer = players.LocalPlayer
+    local camera = game:GetService("Workspace").CurrentCamera
+
+    for _, player in pairs(players:GetPlayers()) do
+        if player ~= localPlayer and (not teamCheck or player.Team ~= localPlayer.Team) then
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local rootPart = player.Character.HumanoidRootPart
+                local head = player.Character:FindFirstChild("Head")
+                local torso = player.Character:FindFirstChild("Torso")
+
+                local rootPos, onScreen = camera:WorldToViewportPoint(rootPart.Position)
+                local headPos = camera:WorldToViewportPoint(head.Position)
+                local torsoPos = camera:WorldToViewportPoint(torso.Position)
+
+                if onScreen and visualsEnabled then
+                    local boxHeight = (headPos.Y - torsoPos.Y) * 2
+                    local boxWidth = boxHeight / 2.5
+
+                    -- Dibujar el rectángulo en la pantalla
+                    local box = Drawing.new("Square")
+                    box.Visible = true
+                    box.Color = Color3.fromRGB(255, 0, 0)
+                    box.Thickness = 1
+                    box.Size = Vector2.new(boxWidth, boxHeight)
+                    box.Position = Vector2.new(rootPos.X - boxWidth / 2, rootPos.Y - boxHeight / 2)
+                end
+            end
+        end
+    end
+end
+
+-- Conexión para Actualizar el ESP en Cada Frame
+game:GetService("RunService").RenderStepped:Connect(function()
+    if aimbotEnabled then
+        AimAtTarget()
+    end
+    if visualsEnabled then
+        DrawESP()
+    end
+end)
 
 -- Inicializar la Interfaz
 Window:Initialize()
