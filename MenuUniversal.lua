@@ -15,7 +15,7 @@ local aimbotSmoothness = 1
 local hitPart = "Head"
 
 -- Configuración del Aimbot
-AimbotTab:Toggle({
+AimbotTab:AddToggle({
     Name = "Enabled",
     Default = false,
     Pointer = "AimbotMain_Enabled",
@@ -25,7 +25,7 @@ AimbotTab:Toggle({
     end
 })
 
-AimbotTab:Keybind({
+AimbotTab:AddKeybind({
     Default = aimbotKey,
     KeybindName = "Aimbot Key",
     Mode = "Hold",
@@ -37,7 +37,7 @@ AimbotTab:Keybind({
     end
 })
 
-AimbotTab:Slider({
+AimbotTab:AddSlider({
     Name = "Smoothness",
     Minimum = 1,
     Maximum = 30,
@@ -49,7 +49,7 @@ AimbotTab:Slider({
     end
 })
 
-AimbotTab:Dropdown({
+AimbotTab:AddDropdown({
     Name = "Hit-Part",
     Options = {"Head", "Torso", "Arms", "Legs"},
     Default = "Head",
@@ -106,7 +106,7 @@ local VisualsTab = Window:Page({Name = "Visuals"})
 local visualsEnabled = false
 local teamCheck = true
 
-VisualsTab:Toggle({
+VisualsTab:AddToggle({
     Name = "Box ESP",
     Default = false,
     Pointer = "VisualsEnemies_BoxEsp",
@@ -116,7 +116,7 @@ VisualsTab:Toggle({
     end
 })
 
-VisualsTab:Toggle({
+VisualsTab:AddToggle({
     Name = "Team Check",
     Default = teamCheck,
     Pointer = "VisualsEnemies_TeamCheck",
