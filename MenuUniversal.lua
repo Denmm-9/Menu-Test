@@ -14,20 +14,22 @@ local aimbotKey = Enum.KeyCode.E
 local aimbotSmoothness = 1
 local hitPart = "Head"
 
--- Configuración del Aimbot
+-- Toggle para Aimbot sin Callback
 AimbotTab:AddToggle({
     Name = "Enabled",
     Default = false,
-    Pointer = "AimbotMain_Enabled",
-    Callback = function(value)
-        aimbotEnabled = value
-        if aimbotEnabled then
-            print("Aimbot activated")
-        else
-            print("Aimbot deactivated")
-        end
-    end
+    Pointer = "AimbotMain_Enabled"
 })
+
+-- Control manual del Aimbot
+game:GetService("RunService").RenderStepped:Connect(function()
+    aimbotEnabled = Library.Flags["AimbotMain_Enabled"]
+    if aimbotEnabled then
+        -- Ejecutar la función del Aimbot si está habilitado
+        AimAtTarget()
+    end
+end)
+
 
 
 AimbotTab:AddKeybind({
