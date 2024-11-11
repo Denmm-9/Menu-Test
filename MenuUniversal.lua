@@ -29,10 +29,10 @@ Aimbot_Main:Toggle({
     Default = false,
     Pointer = "AimbotMain_Enabled"
 }):Keybind({
-    Default = Enum.KeyCode.Delete, -- Tecla para activar/desactivar el menú
-    KeybindName = "Open Menu",
-    Mode = "Toggle",
-    Pointer = "AimbotMain_MenuToggle"
+    Default = Enum.KeyCode.E, -- Cambiar aquí la tecla del Aimbot
+    KeybindName = "Aimbot",
+    Mode = "Hold",
+    Pointer = "AimbotMain_Bind"
 })
 
 Aimbot_Main:Slider({
@@ -48,7 +48,7 @@ Aimbot_Main:Multibox({
     Name = "Hit-Part",
     Minimum = 1,
     Options = {"Head", "Torso", "Arms", "Legs"},
-    Default = {"Head", "Torso"},
+    Default = {},
     Pointer = "AimbotMain_Hitpart"
 })
 
@@ -111,13 +111,13 @@ local Visuals_Box = Visuals_Enemies:Toggle({
 
 local Visuals_HealthBar = Visuals_Enemies:Toggle({
     Name = "Health Bar",
-    Default = true,
+    Default = false,
     Pointer = "VisualsEnemies_HealthBar"
 })
 
 local Visuals_NameTag = Visuals_Enemies:Toggle({
     Name = "Name Tag",
-    Default = true,
+    Default = false,
     Pointer = "VisualsEnemies_NameTag"
 })
 
@@ -131,8 +131,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 
                 -- Verificar si debe dibujarse la caja alrededor del jugador (Box ESP)
                 if Library.flags.VisualsEnemies_BoxEsp then
-                    -- Dibuja una caja alrededor del personaje enemigo
-                    -- Aquí puedes usar tus propias funciones para dibujar la caja en pantalla
+                    -- Aquí puedes agregar el código para el Box ESP
                 end
 
                 -- Team Check (verifica si el jugador es del equipo contrario)
@@ -142,17 +141,17 @@ game:GetService("RunService").RenderStepped:Connect(function()
 
                 -- Dibujar Box
                 if Library.flags.VisualsEnemies_Box then
-                    -- Aquí iría el código para dibujar una caja en el enemigo
+                    -- Código para dibujar el Box en el enemigo
                 end
 
                 -- Dibujar Health Bar
                 if Library.flags.VisualsEnemies_HealthBar then
-                    -- Aquí va el código para dibujar la barra de vida en el enemigo
+                    -- Código para dibujar la barra de vida
                 end
 
                 -- Dibujar Name Tag
                 if Library.flags.VisualsEnemies_NameTag then
-                    -- Aquí va el código para mostrar el nombre del enemigo
+                    -- Código para mostrar el nombre del enemigo
                 end
             end
         end
@@ -162,12 +161,24 @@ end)
 -- Configuración de Visuals para el Jugador
 Visuals_Self:Toggle({
     Name = "Enabled",
-    Default = true,
+    Default = false,
     Pointer = "VisualsSelf_Enabled"
 })
 
 -- Configuración de Ajustes Generales
 Settings_Main:ConfigBox({})
+
+-- Hotkey para Mostrar/Ocultar Menú
+local menuKeybind = Settings_Main:Keybind({
+    Name = "Menu Toggle Key",
+    Default = Enum.KeyCode.Delete,
+    Pointer = "MenuToggleKey"
+})
+
+-- Función para mostrar/ocultar el menú
+menuKeybind:OnChanged(function(newKey)
+    Library:SetToggleKey(newKey)
+end)
 
 Settings_Main:ButtonHolder({
     Buttons = {
@@ -185,6 +196,10 @@ Settings_Main:Button({
     Name = "Unload",
     Callback = function()
         Window:Unload()
+        Library = nil
+        game:GetService("RunService").RenderStepped:Disconnect() -- Desconecta eventos
+        -- Limpia la memoria
+        collectgarbage("collect")
     end
 })
 
