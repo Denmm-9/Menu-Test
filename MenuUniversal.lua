@@ -2,7 +2,7 @@
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/Arceus-X-UI-Library/main/source.lua"))()
 
 -- Crear la ventana del menú
-lib:SetTitle("Xerereca")
+lib:SetTitle("Non")
 lib:SetIcon("http://www.roblox.com/asset/?id=9178187770")
 
 -- Variables globales
@@ -46,59 +46,93 @@ local function isValidTarget(player, character)
 end
 
 -- Funciones de Aimbot
--- Funciones de Aimbot
+local previousCameraCFrame = workspace.CurrentCamera.CFrame
+
 local function updateAimbot()
     if AimbotEnabled then
         local player = game.Players.LocalPlayer
         local camera = workspace.CurrentCamera
         local mouse = player:GetMouse()
 
-        -- Verificar si el objetivo actual sigue siendo válido
-        if CurrentTarget and (not CurrentTarget.Parent or not CurrentTarget.Parent:FindFirstChild("Humanoid") or CurrentTarget.Parent.Humanoid.Health <= 0) then
-            -- El objetivo actual murió o desapareció, buscar un nuevo objetivo
-            CurrentTarget = nil
-        end
+        -- Verificar si la cámara se ha movido
+        local cameraMoved = camera.CFrame ~= previousCameraCFrame
+        previousCameraCFrame = camera.CFrame
 
-        -- Si no hay objetivo, buscar uno nuevo
-        if not CurrentTarget then
-            local closestPlayer = nil
-            local shortestDistance = math.huge
+        -- Solo actualizar el objetivo si la cámara se movió
+        if cameraMoved then
+            -- Verificar si el objetivo actual sigue siendo válido
+            if CurrentTarget and (not CurrentTarget.Parent or not CurrentTarget.Parent:FindFirstChild("Humanoid") or CurrentTarget.Parent.Humanoid.Health <= 0) then
+                -- El objetivo actual murió o desapareció, buscar un nuevo objetivo
+                CurrentTarget = nil
+            end
 
-            -- Buscar un nuevo objetivo (sin incluir al LocalPlayer)
-            for _, v in pairs(game.Players:GetPlayers()) do
-                if v ~= player and v.Character and v.Character:FindFirstChild(TargetPart) then
-                    local targetPart = v.Character:FindFirstChild(TargetPart)
-                    local screenPos, onScreen = camera:WorldToViewportPoint(targetPart.Position)
+            -- Si no hay objetivo, buscar uno nuevo
+            if not CurrentTarget then
+                local closestPlayer = nil
+                local shortestDistance = math.huge
+                local leftSideTarget = nil
+                local rightSideTarget = nil
 
-                    if onScreen then
-                        local distanceFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)).Magnitude
-                        if distanceFromCenter <= DrawingFOV.Radius then
-                            -- Actualizar al objetivo más cercano
+                -- Buscar un nuevo objetivo (sin incluir al LocalPlayer)
+                for _, v in pairs(game.Players:GetPlayers()) do
+                    if v ~= player and v.Character and v.Character:FindFirstChild(TargetPart) then
+                        local targetPart = v.Character:FindFirstChild(TargetPart)
+                        local screenPos, onScreen = camera:WorldToViewportPoint(targetPart.Position)
+
+                        if onScreen then
+                            local distanceFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)).Magnitude
                             local distance = (camera.CFrame.Position - targetPart.Position).Magnitude
-                            if distance < shortestDistance then
-                                closestPlayer = targetPart
-                                shortestDistance = distance
+
+                            -- Verificar si el objetivo está dentro del FOV
+                            if distanceFromCenter <= DrawingFOV.Radius then
+                                -- Dividir la pantalla en dos áreas: izquierda y derecha
+                                if screenPos.X < camera.ViewportSize.X / 2 then
+                                    -- Objetivo en el lado izquierdo
+                                    if not leftSideTarget or distance < shortestDistance then
+                                        leftSideTarget = targetPart
+                                    end
+                                else
+                                    -- Objetivo en el lado derecho
+                                    if not rightSideTarget or distance < shortestDistance then
+                                        rightSideTarget = targetPart
+                                    end
+                                end
+
+                                -- Actualizar al objetivo más cercano (sin importar el lado)
+                                if distance < shortestDistance then
+                                    closestPlayer = targetPart
+                                    shortestDistance = distance
+                                end
                             end
                         end
                     end
                 end
+
+                -- Si el jugador está apuntando hacia la izquierda o la derecha, cambiar el objetivo
+                if mouse.X < camera.ViewportSize.X / 2 then
+                    -- Apuntar al objetivo en el lado izquierdo
+                    if leftSideTarget then
+                        CurrentTarget = leftSideTarget
+                    end
+                else
+                    -- Apuntar al objetivo en el lado derecho
+                    if rightSideTarget then
+                        CurrentTarget = rightSideTarget
+                    end
+                end
             end
 
-            -- Establecer el nuevo objetivo si encontramos uno
-            if closestPlayer then
-                CurrentTarget = closestPlayer
+            -- Apuntar al objetivo actual si lo encontramos
+            if CurrentTarget then
+                local aimPosition = CurrentTarget.Position
+                -- Sin suavizado (no Lerp)
+                camera.CFrame = CFrame.new(camera.CFrame.Position, aimPosition)
             end
-        end
-
-        -- Apuntar al objetivo actual si lo encontramos
-        if CurrentTarget then
-            local aimPosition = CurrentTarget.Position
-            -- Sin suavizado (no Lerp)
-            camera.CFrame = CFrame.new(camera.CFrame.Position, aimPosition)
         end
     end
 end
 RunService.RenderStepped:Connect(updateAimbot)
+
 
 
 
@@ -272,14 +306,18 @@ end
 -- Funciones del FOV
 RunService.RenderStepped:Connect(function()
     if FOVVisible then
+        -- Asegurarse de que el círculo solo tenga el borde y no el relleno
         DrawingFOV.Visible = true
         DrawingFOV.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
         DrawingFOV.Radius = FOVSize
         DrawingFOV.Color = FOVColor
+        DrawingFOV.Filled = false  -- No tiene relleno, solo el borde
+        DrawingFOV.Thickness = 0.9   -- Grosor del borde (puedes ajustarlo si lo deseas)
     else
         DrawingFOV.Visible = false
     end
 end)
+
 
 -- Inicialización del Menú
 lib:AddToggle("Activar Aimbot", function(state)
