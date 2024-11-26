@@ -2,7 +2,7 @@
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/Arceus-X-UI-Library/main/source.lua"))()
 
 -- Crear la ventana del menú
-lib:SetTitle("Non")
+lib:SetTitle("Xerereca")
 lib:SetIcon("http://www.roblox.com/asset/?id=9178187770")
 
 -- Variables globales
