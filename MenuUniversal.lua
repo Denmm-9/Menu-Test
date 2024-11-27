@@ -1,15 +1,22 @@
--- Cargar la biblioteca Arceus X
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/Arceus-X-UI-Library/main/source.lua"))()
 
 -- Crear la ventana del menú
-lib:SetTitle("Non")
+lib:SetTitle("Xerereca")
 lib:SetIcon("http://www.roblox.com/asset/?id=9178187770")
+lib:SetTheme("Aqua")
 
 -- Variables globales
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
+local UserInputService = game:GetService("UserInputService")
+local hitboxActive = false
+local hitboxTransparency = 0.5 
+local activeHeadSize = Vector3.new(3, 3, 3) 
+local originalHeadSizes = {}
+
+
 
 -- Aimbot Variables
 local AimbotEnabled = false
@@ -36,114 +43,81 @@ local TeamCheckEnabled = false
 -- Funciones auxiliares
 local function isValidTarget(player, character)
     if TeamCheckEnabled then
-        -- Validar si el jugador pertenece al mismo equipo
-        local localPlayer = game.Players.LocalPlayer
-        if player.Team == localPlayer.Team then
-            return false  -- No es un objetivo válido si pertenece al mismo equipo
+        if player.Team == LocalPlayer.Team then
+            return false 
         end
     end
-    return true  -- El objetivo es válido si pasa la validación del equipo
+    return true 
 end
 
 -- Funciones de Aimbot
-local previousCameraCFrame = workspace.CurrentCamera.CFrame
-
 local function updateAimbot()
     if AimbotEnabled then
-        local player = game.Players.LocalPlayer
-        local camera = workspace.CurrentCamera
-        local mouse = player:GetMouse()
+        local closestPlayer = nil
+        local shortestDistance = math.huge
+        local leftSideTarget = nil
+        local rightSideTarget = nil
 
-        -- Verificar si la cámara se ha movido
-        local cameraMoved = camera.CFrame ~= previousCameraCFrame
-        previousCameraCFrame = camera.CFrame
+        -- Obtenemos la posición del mouse (en PC)
+        local mousePos = UserInputService:GetMouseLocation()
+        local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-        -- Solo actualizar el objetivo si la cámara se movió
-        if cameraMoved then
-            -- Verificar si el objetivo actual sigue siendo válido
-            if CurrentTarget and (not CurrentTarget.Parent or not CurrentTarget.Parent:FindFirstChild("Humanoid") or CurrentTarget.Parent.Humanoid.Health <= 0) then
-                -- El objetivo actual murió o desapareció, buscar un nuevo objetivo
-                CurrentTarget = nil
-            end
+        -- Buscar un nuevo objetivo
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(TargetPart) then
+                local targetPart = player.Character:FindFirstChild(TargetPart)
+                local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
 
-            -- Si no hay objetivo, buscar uno nuevo
-            if not CurrentTarget then
-                local closestPlayer = nil
-                local shortestDistance = math.huge
-                local leftSideTarget = nil
-                local rightSideTarget = nil
+                if onScreen then
+                    local distanceFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+                    local distance = (Camera.CFrame.Position - targetPart.Position).Magnitude
 
-                -- Buscar un nuevo objetivo (sin incluir al LocalPlayer)
-                for _, v in pairs(game.Players:GetPlayers()) do
-                    if v ~= player and v.Character and v.Character:FindFirstChild(TargetPart) then
-                        local targetPart = v.Character:FindFirstChild(TargetPart)
-                        local screenPos, onScreen = camera:WorldToViewportPoint(targetPart.Position)
+                    -- Verificar si el objetivo está dentro del FOV
+                    if distanceFromCenter <= DrawingFOV.Radius then
+                        if screenPos.X < Camera.ViewportSize.X / 2 then
+                            leftSideTarget = targetPart
+                        else
+                            rightSideTarget = targetPart
+                        end
 
-                        if onScreen then
-                            local distanceFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)).Magnitude
-                            local distance = (camera.CFrame.Position - targetPart.Position).Magnitude
-
-                            -- Verificar si el objetivo está dentro del FOV
-                            if distanceFromCenter <= DrawingFOV.Radius then
-                                -- Dividir la pantalla en dos áreas: izquierda y derecha
-                                if screenPos.X < camera.ViewportSize.X / 2 then
-                                    -- Objetivo en el lado izquierdo
-                                    if not leftSideTarget or distance < shortestDistance then
-                                        leftSideTarget = targetPart
-                                    end
-                                else
-                                    -- Objetivo en el lado derecho
-                                    if not rightSideTarget or distance < shortestDistance then
-                                        rightSideTarget = targetPart
-                                    end
-                                end
-
-                                -- Actualizar al objetivo más cercano (sin importar el lado)
-                                if distance < shortestDistance then
-                                    closestPlayer = targetPart
-                                    shortestDistance = distance
-                                end
-                            end
+                        if distance < shortestDistance then
+                            closestPlayer = targetPart
+                            shortestDistance = distance
                         end
                     end
                 end
-
-                -- Si el jugador está apuntando hacia la izquierda o la derecha, cambiar el objetivo
-                if mouse.X < camera.ViewportSize.X / 2 then
-                    -- Apuntar al objetivo en el lado izquierdo
-                    if leftSideTarget then
-                        CurrentTarget = leftSideTarget
-                    end
-                else
-                    -- Apuntar al objetivo en el lado derecho
-                    if rightSideTarget then
-                        CurrentTarget = rightSideTarget
-                    end
-                end
             end
+        end
 
-            -- Apuntar al objetivo actual si lo encontramos
-            if CurrentTarget then
-                local aimPosition = CurrentTarget.Position
-                -- Sin suavizado (no Lerp)
-                camera.CFrame = CFrame.new(camera.CFrame.Position, aimPosition)
+        -- Cambiar de objetivo según la posición del mouse
+        if mousePos.X < Camera.ViewportSize.X / 2 then
+            if leftSideTarget then
+                CurrentTarget = leftSideTarget
             end
+        else
+            if rightSideTarget then
+                CurrentTarget = rightSideTarget
+            end
+        end
+
+        -- Apuntar al objetivo actual
+        if CurrentTarget then
+            local aimPosition = CurrentTarget.Position
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, aimPosition)
         end
     end
 end
+
 RunService.RenderStepped:Connect(updateAimbot)
-
-
 
 
 -- Funciones de ESP Boxes
 local function createBox(player)
-    -- Crear elementos de la caja
     local Box = {
-        Frame = Drawing.new("Square"),        -- Borde blanco interior
-        OuterFrame = Drawing.new("Square"),   -- Borde negro exterior
+        Frame = Drawing.new("Square"),       
+        OuterFrame = Drawing.new("Square"),  
         Background = Drawing.new("Square"),
-        Shadow = Drawing.new("Square")        -- Sombra negra
+        Shadow = Drawing.new("Square")        
     }
 
     -- Configuración de la caja (fondo oscuro)
@@ -173,7 +147,6 @@ local function createBox(player)
 end
 
 local function updateBox(player)
-    -- Validar si el jugador es válido y no es el jugador local
     if not player or player == LocalPlayer or not player.Character then
         return
     end
@@ -318,6 +291,39 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+local function updateHitboxesForAllCharacters()
+    -- Recorre todos los jugadores en el juego
+    for _, player in pairs(game.Players:GetPlayers()) do
+        -- Asegúrate de no modificar al jugador local
+        if player ~= game.Players.LocalPlayer and player.Character then
+            local character = player.Character
+            local head = character:FindFirstChild("Head")
+
+            if head then
+                -- Verifica si la hitbox está activa y si el jugador es un objetivo válido
+                if hitboxActive and isValidTarget(player, character) then
+                    -- Solo ajusta el tamaño de la cabeza si no se ha hecho antes
+                    if not originalHeadSizes[head] then
+                        originalHeadSizes[head] = head.Size  -- Guarda el tamaño original de la cabeza
+                    end
+
+                    -- Aplica el tamaño y la transparencia configurados
+                    head.Size = activeHeadSize
+                    head.Transparency = hitboxTransparency
+                elseif originalHeadSizes[head] then
+                    -- Si la hitbox no está activa, restaura el tamaño y la transparencia originales
+                    head.Size = originalHeadSizes[head]
+                    head.Transparency = 0  -- Restaurar la transparencia original
+                    originalHeadSizes[head] = nil  -- Elimina el tamaño original para evitar reiniciar innecesariamente
+                end
+            end
+        end
+    end
+end
+
+-- Esta función se puede llamar en un bucle de actualización continuo, por ejemplo, dentro de `Heartbeat`
+game:GetService("RunService").Heartbeat:Connect(updateHitboxesForAllCharacters)
+
 
 -- Inicialización del Menú
 lib:AddToggle("Activar Aimbot", function(state)
@@ -333,6 +339,30 @@ end)
 
 lib:AddComboBox("Tamaño FOV", {"50", "100", "150", "200", "250"}, function(selection)
     FOVSize = tonumber(selection)
+end)
+
+lib:AddToggle("Hitbox", function(state)
+    hitboxActive = state
+end)
+
+-- ComboBox para seleccionar Tamaño de Hitbox
+lib:AddComboBox("Hitbox Size", {"1", "2", "3", "4", "5"}, function(selection)
+    if selection == "2" then
+        activeHeadSize = Vector3.new(2, 2, 2)  
+    elseif selection == "3" then
+        activeHeadSize = Vector3.new(3, 3, 3)  
+    elseif selection == "1" then
+        activeHeadSize = Vector3.new(1, 1, 1)  
+    elseif selection == "4" then
+        activeHeadSize = Vector3.new(4, 4, 4) 
+    elseif selection == "5" then
+        activeHeadSize = Vector3.new(5, 5, 5)  
+    end
+end)
+
+-- Dropdown para seleccionar Transparencia
+lib:AddComboBox("Hitbox Transparency", {"0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"}, function(selection)
+    hitboxTransparency = tonumber(selection) or 0.5  
 end)
 
 lib:AddToggle("Boxes", function(state)
@@ -396,3 +426,4 @@ RunService.RenderStepped:Connect(function()
         end
     end
 end)
+
