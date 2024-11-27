@@ -1,3 +1,5 @@
+-- OPEN SOURCE HELP WITH AI --
+
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/Arceus-X-UI-Library/main/source.lua"))()
 
 -- Crear la ventana del menú
