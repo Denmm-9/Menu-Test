@@ -108,7 +108,9 @@ local function updateAimbot()
     end
 end
 
+-- Ejecutar el aimbot cada frame
 RunService.RenderStepped:Connect(updateAimbot)
+
 
 
 -- Funciones de ESP Boxes
@@ -323,6 +325,35 @@ end
 
 -- Esta función se puede llamar en un bucle de actualización continuo, por ejemplo, dentro de `Heartbeat`
 game:GetService("RunService").Heartbeat:Connect(updateHitboxesForAllCharacters)
+
+local ScreenGui = Instance.new("ScreenGui")
+local ToggleButton = Instance.new("TextButton")
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Personalización de la posición y tamaño del botón (puedes ajustar estos valores)
+ToggleButton.Size = UDim2.new(0, 250, 0, 60)  -- Ajusta el tamaño del botón (ancho, alto)
+ToggleButton.Position = UDim2.new(0, 10, 0, 10)  -- Ajusta la posición del botón (X, Y) desde la esquina superior izquierda
+ToggleButton.Text = "AIMBOT"  -- Texto del botón
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Verde cuando está activado
+
+-- Cambiar el tamaño del texto
+ToggleButton.TextSize = 30  -- Ajusta este valor para cambiar el tamaño del texto (puedes poner un valor mayor o menor)
+
+-- Función para manejar el Toggle
+ToggleButton.MouseButton1Click:Connect(function()
+    AimbotEnabled = not AimbotEnabled
+    if AimbotEnabled then
+        ToggleButton.Text = "OFF"  -- Cambia el texto cuando se activa
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Rojo cuando está desactivado
+    else
+        ToggleButton.Text = "ON"  -- Cambia el texto cuando se desactiva
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Verde cuando está activado
+        CurrentTarget = nil  -- Limpiar objetivo cuando el aimbot se desactiva
+    end
+end)
+
+
 
 
 -- Inicialización del Menú
