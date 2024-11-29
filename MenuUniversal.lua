@@ -23,7 +23,7 @@ local TargetPart = "Head"
 local CurrentTarget = nil
 local FOVSize = 50
 local FOVVisible = false
-local FOVColor = Color3.new(1, 1, 1) -- Blanco
+local FOVColor = Color3.new(1, 1, 1) 
 local DrawingFOV = Drawing.new("Circle")
 local Chams = {}
 local ChamsActive = false
@@ -33,37 +33,31 @@ local ESPBoxes = {}
 local ESPEnabled = false
 local TeamCheckEnabled = false
 
--- Verificacion
+-- VERIFICACION
 local function isValidTarget(player)
-    -- Verificar si el jugador está vivo
     if not player.Character or not player.Character:FindFirstChild("Humanoid") or player.Character.Humanoid.Health <= 0 then
-        return false -- Si no está vivo, no es un objetivo válido
+        return false
     end
 
-    -- Verificar si el jugador está en el mismo equipo (si la comprobación de equipo está habilitada)
     if TeamCheckEnabled and player.Team == LocalPlayer.Team then
-        return false -- No apuntar a jugadores del mismo equipo
+        return false 
     end
 
-    return true -- Si pasa todas las validaciones, el jugador es un objetivo válido
+    return true
 end
 
--- Función para verificar si un objetivo es visible (wallhack)
 local function isVisible(position, character)
     if not WallhackEnabled then
-        return true -- Si Wallhack no está habilitado, todos los objetivos serán visibles
+        return true 
     end
-
-    -- Excluir jugadores y sus cabezas, pero asegurarse de que otros objetos sean obstrucciones
+    
     local excludeParts = {workspace.CurrentCamera, character}
-
-    -- Agregar a los jugadores y sus cabezas a excludeParts
     for _, player in pairs(game.Players:GetPlayers()) do
         if player.Character then
-            table.insert(excludeParts, player.Character)  -- Excluir personaje completo
+            table.insert(excludeParts, player.Character)  
             local head = player.Character:FindFirstChild("Head")
             if head then
-                table.insert(excludeParts, head)  -- Excluir cabeza
+                table.insert(excludeParts, head)  
             end
         end
     end
@@ -76,17 +70,13 @@ local function updateAimbot()
     if AimbotEnabled then
         local closestPlayer = nil
         local shortestDistance = math.huge
-
-        -- Obtener la posición del mouse (en PC)
         local mousePos = UserInputService:GetMouseLocation()
         local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-        -- Buscar un nuevo objetivo
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(TargetPart) then
                 local targetPart = player.Character:FindFirstChild(TargetPart)
 
-                -- Verificar si el jugador es un objetivo válido
                 if isValidTarget(player) then
                     local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
 
@@ -94,15 +84,12 @@ local function updateAimbot()
                         local distanceFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
                         local distance = (Camera.CFrame.Position - targetPart.Position).Magnitude
 
-                        -- Verificar si el objetivo está dentro del FOV
                         if distanceFromCenter <= DrawingFOV.Radius then
-                            -- Verificar si el objetivo es visible (wallhack)
+   
                             if WallhackEnabled and not isVisible(targetPart.Position, player.Character) then
-                                -- Si el objetivo no es visible, no apuntar a él
                                 continue
                             end
 
-                            -- Si la distancia es la más corta, seleccionamos el objetivo más cercano
                             if distance < shortestDistance then
                                 closestPlayer = targetPart
                                 shortestDistance = distance
@@ -113,19 +100,13 @@ local function updateAimbot()
             end
         end
 
-        -- Si encontramos un objetivo, apuntar al más cercano
         if closestPlayer then
             local aimPosition = closestPlayer.Position
-            -- Apuntar correctamente sin cambiar la posición de la cámara de manera errónea
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, aimPosition)
         end
     end
 end
-
--- Ejecutar el aimbot cada frame
 RunService.RenderStepped:Connect(updateAimbot)
-
-
 
 -- ESP
 local function createBox(player)
@@ -136,29 +117,24 @@ local function createBox(player)
         Shadow = Drawing.new("Square")        
     }
 
-    -- Configuración de la caja (fondo oscuro)
-    Box.Background.Transparency = 0.2 -- Fondo semitransparente
-    Box.Background.Color = Color3.fromRGB(0, 0, 0) -- Fondo oscuro
-    Box.Background.Filled = true -- Fondo lleno
-    Box.Background.Thickness = 0 -- Sin borde en el fondo
+    Box.Background.Transparency = 0.2 
+    Box.Background.Color = Color3.fromRGB(0, 0, 0) 
+    Box.Background.Filled = true 
+    Box.Background.Thickness = 0 
 
-    -- Configuración del borde negro exterior (más grande)
-    Box.OuterFrame.Thickness = 1.1 -- Grosor del borde negro exterior
-    Box.OuterFrame.Color = Color3.fromRGB(0, 0, 0) -- Color negro
-    Box.OuterFrame.Filled = false -- Solo borde sin fondo
+    Box.OuterFrame.Thickness = 1.1 
+    Box.OuterFrame.Color = Color3.fromRGB(0, 0, 0)
+    Box.OuterFrame.Filled = false 
 
-    -- Configuración del borde blanco interior
-    Box.Frame.Thickness = 0.8 -- Grosor del borde blanco
-    Box.Frame.Color = Color3.fromRGB(255, 255, 255) -- Color blanco
-    Box.Frame.Filled = false -- Solo borde sin fondo
+    Box.Frame.Thickness = 0.8
+    Box.Frame.Color = Color3.fromRGB(255, 255, 255) 
+    Box.Frame.Filled = false 
 
-    -- Configuración de la sombra
     Box.Shadow.Transparency = 1
-    Box.Shadow.Color = Color3.fromRGB(0, 0, 0) -- Sombra negra
+    Box.Shadow.Color = Color3.fromRGB(0, 0, 0) 
     Box.Shadow.Filled = true
     Box.Shadow.Thickness = 0
 
-    -- Guardar en la tabla
     ESPBoxes[player] = Box
 end
 
@@ -170,7 +146,6 @@ local function updateBox(player)
     local Box = ESPBoxes[player]
     if not Box then return end
 
-    -- Verificar si el jugador tiene un personaje y está visible
     local character = player.Character
     if character:FindFirstChild("HumanoidRootPart") then
         local rootPart = character.HumanoidRootPart
@@ -178,7 +153,6 @@ local function updateBox(player)
         
         if not localRootPart then return end
 
-        -- Verificamos si el objetivo es válido según los modos
         if not isValidTarget(player, character) then
             Box.Background.Visible = false
             Box.Frame.Visible = false
@@ -187,38 +161,32 @@ local function updateBox(player)
         end
 
         local Vector, OnScreen = Camera:WorldToViewportPoint(rootPart.Position)
-        local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude -- Distancia basada en la cámara
+        local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude 
 
         if OnScreen then
-            -- Ajustar el tamaño según la distancia
-            local baseSizeX, baseSizeY = 100, 130 -- Tamaño base de la caja
-            local scaleFactor = math.clamp(1 / (distance / 30), 0.1, 2.8) -- Escalar de forma proporcional a la distancia
+            local baseSizeX, baseSizeY = 100, 130 
+            local scaleFactor = math.clamp(1 / (distance / 30), 0.1, 2.8) 
 
             local sizeX, sizeY = baseSizeX * scaleFactor, baseSizeY * scaleFactor
             local posX, posY = Vector.X - sizeX / 2, Vector.Y - sizeY / 2.3
 
-            -- Actualizar la posición y tamaño del fondo
             Box.Background.Size = Vector2.new(sizeX, sizeY)
             Box.Background.Position = Vector2.new(posX, posY)
             Box.Background.Visible = true
 
-            -- Actualizar el borde negro exterior (ligeramente más grande)
             Box.OuterFrame.Size = Vector2.new(sizeX + 2, sizeY + 2)
             Box.OuterFrame.Position = Vector2.new(posX - 1, posY - 1)
             Box.OuterFrame.Visible = true
 
-            -- Actualizar el borde blanco interior
             Box.Frame.Size = Vector2.new(sizeX, sizeY)
             Box.Frame.Position = Vector2.new(posX, posY)
             Box.Frame.Visible = true
         else
-            -- Si el jugador no está visible, ocultar las cajas
             Box.Background.Visible = false
             Box.Frame.Visible = false
             Box.OuterFrame.Visible = false
         end
     else
-        -- Si el personaje no existe, ocultar las cajas
         Box.Background.Visible = false
         Box.Frame.Visible = false
         Box.OuterFrame.Visible = false
@@ -239,29 +207,26 @@ end
 local function createChams(player)
     local character = player and player.Character or nil
     if not character or not character:FindFirstChild("HumanoidRootPart") then
-        return -- Salir si el personaje no es válido
+        return
     end
 
     if not isValidTarget(player, character) then
-        return -- Salir si no cumple las condiciones de los modos
+        return 
     end
 
-    -- Crear un Highlight si no existe
     if not Chams[player or character] then
         local highlight = Instance.new("Highlight")
-        highlight.Adornee = character -- Asociar el Highlight al personaje
-        highlight.Parent = game.CoreGui -- Evitar problemas con Parenting
-        highlight.FillColor = chamsColor -- Color del glow
-        highlight.FillTransparency = chamsTransparency -- Transparencia del relleno
-        highlight.OutlineColor = Color3.fromRGB(0, 0, 0) -- Contorno negro
-        highlight.OutlineTransparency = 0 -- Sin transparencia en el contorno
+        highlight.Adornee = character 
+        highlight.Parent = game.CoreGui 
+        highlight.FillColor = chamsColor 
+        highlight.FillTransparency = chamsTransparency 
+        highlight.OutlineColor = Color3.fromRGB(0, 0, 0) 
+        highlight.OutlineTransparency = 0 
 
-        -- Guardar el Highlight en la tabla
         Chams[player or character] = highlight
     else
-        -- Actualizar Adornee si el Highlight ya existe
         Chams[player or character].Adornee = character
-        Chams[player or character].Enabled = true -- Reactivar si estaba desactivado
+        Chams[player or character].Enabled = true 
     end
 end
 
@@ -274,7 +239,7 @@ local function updateChams(player)
         if not highlight then
             createChams(player)
         else
-            highlight.Adornee = character -- Aseguramos que sigue apuntando al personaje
+            highlight.Adornee = character 
         end
     else
         if highlight then
@@ -287,106 +252,94 @@ end
 local function removeChams(player)
     local highlight = Chams[player or (player and player.Character)]
     if highlight then
-        highlight:Destroy() -- Destruir el Highlight
-        Chams[player or (player and player.Character)] = nil -- Eliminar referencia en la tabla
+        highlight:Destroy()
+        Chams[player or (player and player.Character)] = nil
     end
 end
 
 -- FOV
 RunService.RenderStepped:Connect(function()
     if FOVVisible then
-        -- Asegurarse de que el círculo solo tenga el borde y no el relleno
+
         DrawingFOV.Visible = true
         DrawingFOV.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
         DrawingFOV.Radius = FOVSize
         DrawingFOV.Color = FOVColor
-        DrawingFOV.Filled = false  -- No tiene relleno, solo el borde
-        DrawingFOV.Thickness = 0.9   -- Grosor del borde (puedes ajustarlo si lo deseas)
+        DrawingFOV.Filled = false  
+        DrawingFOV.Thickness = 0.9  
     else
         DrawingFOV.Visible = false
     end
 end)
 
 local function updateHitboxesForAllCharacters()
-    -- Recorre todos los jugadores en el juego
     for _, player in pairs(game.Players:GetPlayers()) do
-        -- Asegúrate de no modificar al jugador local
+
         if player ~= game.Players.LocalPlayer and player.Character then
             local character = player.Character
             local head = character:FindFirstChild("Head")
 
             if head then
-                -- Verifica si la hitbox está activa y si el jugador es un objetivo válido
+         
                 if hitboxActive and isValidTarget(player, character) then
-                    -- Solo ajusta el tamaño de la cabeza si no se ha hecho antes
+            
                     if not originalHeadSizes[head] then
-                        originalHeadSizes[head] = head.Size  -- Guarda el tamaño original de la cabeza
+                        originalHeadSizes[head] = head.Size 
                     end
-
-                    -- Aplica el tamaño y la transparencia configurados
                     head.Size = activeHeadSize
                     head.Transparency = hitboxTransparency
                 elseif originalHeadSizes[head] then
-                    -- Si la hitbox no está activa, restaura el tamaño y la transparencia originales
+
                     head.Size = originalHeadSizes[head]
-                    head.Transparency = 0  -- Restaurar la transparencia original
-                    originalHeadSizes[head] = nil  -- Elimina el tamaño original para evitar reiniciar innecesariamente
+                    head.Transparency = 0  
+                    originalHeadSizes[head] = nil
                 end
             end
         end
     end
 end
-
--- Esta función se puede llamar en un bucle de actualización continuo, por ejemplo, dentro de `Heartbeat`
 game:GetService("RunService").Heartbeat:Connect(updateHitboxesForAllCharacters)
 
---BUTTOMS GUI
+-- SCREEN GUI
 local function createToggleButton()
     local ScreenGui = Instance.new("ScreenGui")
     local ToggleButton = Instance.new("TextButton")
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
-    -- Personalización del botón
-    ToggleButton.Size = UDim2.new(0, 250, 0, 60)  -- Ajusta el tamaño del botón
-    ToggleButton.Position = UDim2.new(0, 10, 0, 10)  -- Ajusta la posición del botón
-    ToggleButton.Text = "AIMBOT"  -- Texto del botón
+    ToggleButton.Size = UDim2.new(0, 250, 0, 60)  
+    ToggleButton.Position = UDim2.new(0, 10, 0, 10)  
+    ToggleButton.Text = "AIMBOT" 
     ToggleButton.Parent = ScreenGui
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Verde cuando está activado
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  
     
-    -- Cambiar el tamaño del texto
-    ToggleButton.TextSize = 30  -- Tamaño del texto
+    ToggleButton.TextSize = 30  
     
-    -- Función para manejar el Toggle
     ToggleButton.MouseButton1Click:Connect(function()
         AimbotEnabled = not AimbotEnabled
         if AimbotEnabled then
-            ToggleButton.Text = "OFF"  -- Cambia el texto cuando se activa
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Rojo cuando está activado
+            ToggleButton.Text = "OFF"  
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  
         else
-            ToggleButton.Text = "ON"  -- Cambia el texto cuando se desactiva
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Verde cuando está desactivado
-            CurrentTarget = nil  -- Limpiar objetivo cuando el aimbot se desactiva
+            ToggleButton.Text = "ON"  
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  
+            CurrentTarget = nil  
         end
     end)
 end
-
--- Asegurarse de que el botón se cree cada vez que el jugador respawnee o inicie una nueva partida
 game.Players.LocalPlayer.CharacterAdded:Connect(function()
-    createToggleButton()  -- Crear el botón cuando el jugador respawnea
+    createToggleButton()  
 end)
-
--- Crear el botón al inicio (cuando se une al juego por primera vez)
 createToggleButton()
 
--- Inicialización del Menú
-lib:AddToggle("Activar Aimbot", function(state)
+-- MENU
+lib:AddToggle("Aimbot", function(state)
     AimbotEnabled = state
     if not state then
-        CurrentTarget = nil -- Limpiar objetivo al desactivar
+        CurrentTarget = nil
     end
 end)
 
-lib:AddToggle("Activar FOV", function(state)
+lib:AddToggle("FOV", function(state)
     FOVVisible = state
 end)
 
@@ -398,7 +351,6 @@ lib:AddToggle("Hitbox", function(state)
     hitboxActive = state
 end)
 
--- ComboBox para seleccionar Tamaño de Hitbox
 lib:AddComboBox("Hitbox Size", {"1", "2", "3", "4", "5"}, function(selection)
     if selection == "2" then
         activeHeadSize = Vector3.new(2, 2, 2)  
@@ -413,7 +365,6 @@ lib:AddComboBox("Hitbox Size", {"1", "2", "3", "4", "5"}, function(selection)
     end
 end)
 
--- Dropdown para seleccionar Transparencia
 lib:AddComboBox("Hitbox Transparency", {"0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"}, function(selection)
     hitboxTransparency = tonumber(selection) or 0.5  
 end)
@@ -446,8 +397,8 @@ lib:AddToggle("Chams", function(state)
     end
 end)
 
-lib:AddToggle("Activar Wallcheck", function(state)
-    WallhackEnabled = state -- Activar o desactivar el wallcheck
+lib:AddToggle("Wallhack", function(state)
+    WallhackEnabled = state 
 end)
 
 
@@ -455,7 +406,6 @@ lib:AddToggle("TeamCheck", function(state)
     TeamCheckEnabled = state
 end)
 
--- Listeners para nuevos jugadores
 Players.PlayerAdded:Connect(function(player)
     if ESPEnabled then createBox(player) end
     if ChamsActive then createChams(player) end
@@ -466,7 +416,6 @@ Players.PlayerRemoving:Connect(function(player)
     removeChams(player)
 end)
 
--- Render Stepped para ESP Boxes y Chams
 RunService.RenderStepped:Connect(function()
     if ESPEnabled then
         for _, player in pairs(Players:GetPlayers()) do
