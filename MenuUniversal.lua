@@ -164,7 +164,7 @@ local function updateBox(player)
         local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude 
 
         if OnScreen then
-            local baseSizeX, baseSizeY = 100, 130 
+            local baseSizeX, baseSizeY = 80, 100
             local scaleFactor = math.clamp(1 / (distance / 30), 0.1, 2.8) 
 
             local sizeX, sizeY = baseSizeX * scaleFactor, baseSizeY * scaleFactor
