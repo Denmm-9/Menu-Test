@@ -111,8 +111,7 @@ RunService.RenderStepped:Connect(updateAimbot)
 -- BOX
 local function createBox(player)
     local Box = {
-        Frame = Drawing.new("Square"),       
-        OuterFrame = Drawing.new("Square"),  
+        Frame = Drawing.new("Square"),         
         Background = Drawing.new("Square"),
         Shadow = Drawing.new("Square")        
     }
@@ -121,10 +120,6 @@ local function createBox(player)
     Box.Background.Color = Color3.fromRGB(0, 0, 0) 
     Box.Background.Filled = true 
     Box.Background.Thickness = 0 
-
-    Box.OuterFrame.Thickness = 1.1 
-    Box.OuterFrame.Color = Color3.fromRGB(0, 0, 0)
-    Box.OuterFrame.Filled = false 
 
     Box.Frame.Thickness = 0.8
     Box.Frame.Color = Color3.fromRGB(255, 255, 255) 
@@ -156,7 +151,6 @@ local function updateBox(player)
         if not isValidTarget(player, character) then
             Box.Background.Visible = false
             Box.Frame.Visible = false
-            Box.OuterFrame.Visible = false
             return
         end
 
@@ -164,7 +158,7 @@ local function updateBox(player)
         local distance = (rootPart.Position - Camera.CFrame.Position).Magnitude 
 
         if OnScreen then
-            local baseSizeX, baseSizeY = 80, 100
+            local baseSizeX, baseSizeY = 70, 80
             local scaleFactor = math.clamp(1 / (distance / 30), 0.1, 2.8) 
 
             local sizeX, sizeY = baseSizeX * scaleFactor, baseSizeY * scaleFactor
@@ -174,22 +168,16 @@ local function updateBox(player)
             Box.Background.Position = Vector2.new(posX, posY)
             Box.Background.Visible = true
 
-            Box.OuterFrame.Size = Vector2.new(sizeX + 2, sizeY + 2)
-            Box.OuterFrame.Position = Vector2.new(posX - 1, posY - 1)
-            Box.OuterFrame.Visible = true
-
             Box.Frame.Size = Vector2.new(sizeX, sizeY)
             Box.Frame.Position = Vector2.new(posX, posY)
             Box.Frame.Visible = true
         else
             Box.Background.Visible = false
             Box.Frame.Visible = false
-            Box.OuterFrame.Visible = false
         end
     else
         Box.Background.Visible = false
         Box.Frame.Visible = false
-        Box.OuterFrame.Visible = false
     end
 end
 
