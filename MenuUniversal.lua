@@ -15,7 +15,7 @@ local CurrentCamera = game:GetService("Workspace").CurrentCamera
 -- VARIABLES
 local hitboxActive = false
 local hitboxTransparency = 0.5 
-local activeHeadSize = Vector3.new(3, 3, 3) 
+local activeHeadSize = Vector3.new(4, 4, 4) 
 local originalHeadSizes = {}
 local WallhackEnabled = false
 local AimbotEnabled = false
@@ -28,12 +28,12 @@ local DrawingFOV = Drawing.new("Circle")
 local Chams = {}
 local ChamsActive = false
 local chamsColor = Color3.fromRGB(255, 105, 180)
-local chamsTransparency = 0.5
+local chamsTransparency = 0.7
 local ESPBoxes = {}
 local ESPEnabled = false
 local TeamCheckEnabled = false
 
--- VERIFICACION
+-- VALIDACIONES 
 local function isValidTarget(player)
     if not player.Character or not player.Character:FindFirstChild("Humanoid") or player.Character.Humanoid.Health <= 0 then
         return false
@@ -108,7 +108,7 @@ local function updateAimbot()
 end
 RunService.RenderStepped:Connect(updateAimbot)
 
--- ESP
+-- BOX
 local function createBox(player)
     local Box = {
         Frame = Drawing.new("Square"),       
