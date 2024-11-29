@@ -1,26 +1,23 @@
 -- OPEN SOURCE HELP WITH AI --
-
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/Arceus-X-UI-Library/main/source.lua"))()
-
--- Crear la ventana del menú
 lib:SetTitle("Xerereca")
 lib:SetIcon("http://www.roblox.com/asset/?id=9178187770")
 lib:SetTheme("Aqua")
 
--- Variables globales
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-local UserInputService = game:GetService("UserInputService")
+-- SERVICES
+local Players = game:GetService("Players")  
+local Camera = workspace.CurrentCamera 
+local RunService = game:GetService("RunService") 
+local UserInputService = game:GetService("UserInputService")  
+local LocalPlayer = Players.LocalPlayer 
+local CurrentCamera = game:GetService("Workspace").CurrentCamera
+
+-- VARIABLES
 local hitboxActive = false
 local hitboxTransparency = 0.5 
 local activeHeadSize = Vector3.new(3, 3, 3) 
 local originalHeadSizes = {}
-
-
-
--- Aimbot Variables
+local WallhackEnabled = false
 local AimbotEnabled = false
 local TargetPart = "Head"
 local CurrentTarget = nil
@@ -28,39 +25,59 @@ local FOVSize = 50
 local FOVVisible = false
 local FOVColor = Color3.new(1, 1, 1) -- Blanco
 local DrawingFOV = Drawing.new("Circle")
-
--- Chams Variables
 local Chams = {}
 local ChamsActive = false
 local chamsColor = Color3.fromRGB(255, 105, 180)
 local chamsTransparency = 0.5
-
--- ESP Boxes Variables
 local ESPBoxes = {}
 local ESPEnabled = false
-
--- TeamCheck Variables
 local TeamCheckEnabled = false
 
--- Funciones auxiliares
-local function isValidTarget(player, character)
-    if TeamCheckEnabled then
-        if player.Team == LocalPlayer.Team then
-            return false 
-        end
+-- Verificacion
+local function isValidTarget(player)
+    -- Verificar si el jugador está vivo
+    if not player.Character or not player.Character:FindFirstChild("Humanoid") or player.Character.Humanoid.Health <= 0 then
+        return false -- Si no está vivo, no es un objetivo válido
     end
-    return true 
+
+    -- Verificar si el jugador está en el mismo equipo (si la comprobación de equipo está habilitada)
+    if TeamCheckEnabled and player.Team == LocalPlayer.Team then
+        return false -- No apuntar a jugadores del mismo equipo
+    end
+
+    return true -- Si pasa todas las validaciones, el jugador es un objetivo válido
 end
 
--- Funciones de Aimbot
+-- Función para verificar si un objetivo es visible (wallhack)
+local function isVisible(position, character)
+    if not WallhackEnabled then
+        return true -- Si Wallhack no está habilitado, todos los objetivos serán visibles
+    end
+
+    -- Excluir jugadores y sus cabezas, pero asegurarse de que otros objetos sean obstrucciones
+    local excludeParts = {workspace.CurrentCamera, character}
+
+    -- Agregar a los jugadores y sus cabezas a excludeParts
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player.Character then
+            table.insert(excludeParts, player.Character)  -- Excluir personaje completo
+            local head = player.Character:FindFirstChild("Head")
+            if head then
+                table.insert(excludeParts, head)  -- Excluir cabeza
+            end
+        end
+    end
+
+    return #workspace.CurrentCamera:GetPartsObscuringTarget({position}, excludeParts) == 0
+end
+
+-- AIMBOT
 local function updateAimbot()
     if AimbotEnabled then
         local closestPlayer = nil
         local shortestDistance = math.huge
-        local leftSideTarget = nil
-        local rightSideTarget = nil
 
-        -- Obtenemos la posición del mouse (en PC)
+        -- Obtener la posición del mouse (en PC)
         local mousePos = UserInputService:GetMouseLocation()
         local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
@@ -70,7 +87,7 @@ local function updateAimbot()
                 local targetPart = player.Character:FindFirstChild(TargetPart)
 
                 -- Verificar si el jugador es un objetivo válido
-                if isValidTarget(player, player.Character) then  -- Solo si pasa la validación
+                if isValidTarget(player) then
                     local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
 
                     if onScreen then
@@ -79,12 +96,13 @@ local function updateAimbot()
 
                         -- Verificar si el objetivo está dentro del FOV
                         if distanceFromCenter <= DrawingFOV.Radius then
-                            if screenPos.X < Camera.ViewportSize.X / 2 then
-                                leftSideTarget = targetPart
-                            else
-                                rightSideTarget = targetPart
+                            -- Verificar si el objetivo es visible (wallhack)
+                            if WallhackEnabled and not isVisible(targetPart.Position, player.Character) then
+                                -- Si el objetivo no es visible, no apuntar a él
+                                continue
                             end
 
+                            -- Si la distancia es la más corta, seleccionamos el objetivo más cercano
                             if distance < shortestDistance then
                                 closestPlayer = targetPart
                                 shortestDistance = distance
@@ -95,20 +113,10 @@ local function updateAimbot()
             end
         end
 
-        -- Cambiar de objetivo según la posición del mouse
-        if mousePos.X < Camera.ViewportSize.X / 2 then
-            if leftSideTarget then
-                CurrentTarget = leftSideTarget
-            end
-        else
-            if rightSideTarget then
-                CurrentTarget = rightSideTarget
-            end
-        end
-
-        -- Apuntar al objetivo actual
-        if CurrentTarget then
-            local aimPosition = CurrentTarget.Position
+        -- Si encontramos un objetivo, apuntar al más cercano
+        if closestPlayer then
+            local aimPosition = closestPlayer.Position
+            -- Apuntar correctamente sin cambiar la posición de la cámara de manera errónea
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, aimPosition)
         end
     end
@@ -118,7 +126,8 @@ end
 RunService.RenderStepped:Connect(updateAimbot)
 
 
--- Funciones de ESP Boxes
+
+-- ESP
 local function createBox(player)
     local Box = {
         Frame = Drawing.new("Square"),       
@@ -226,7 +235,7 @@ local function removeBox(player)
     end
 end
 
--- Funciones de Chams
+-- CHAMS
 local function createChams(player)
     local character = player and player.Character or nil
     if not character or not character:FindFirstChild("HumanoidRootPart") then
@@ -283,7 +292,7 @@ local function removeChams(player)
     end
 end
 
--- Funciones del FOV
+-- FOV
 RunService.RenderStepped:Connect(function()
     if FOVVisible then
         -- Asegurarse de que el círculo solo tenga el borde y no el relleno
@@ -331,6 +340,7 @@ end
 -- Esta función se puede llamar en un bucle de actualización continuo, por ejemplo, dentro de `Heartbeat`
 game:GetService("RunService").Heartbeat:Connect(updateHitboxesForAllCharacters)
 
+--BUTTOMS GUI
 local function createToggleButton()
     local ScreenGui = Instance.new("ScreenGui")
     local ToggleButton = Instance.new("TextButton")
@@ -435,6 +445,11 @@ lib:AddToggle("Chams", function(state)
         end
     end
 end)
+
+lib:AddToggle("Activar Wallcheck", function(state)
+    WallhackEnabled = state -- Activar o desactivar el wallcheck
+end)
+
 
 lib:AddToggle("TeamCheck", function(state)
     TeamCheckEnabled = state
